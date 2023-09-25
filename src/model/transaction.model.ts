@@ -6,13 +6,14 @@ import {
 	CreationOptional,
 } from "sequelize";
 import sequelize from "../config/db";
-import User, { UserModel } from "./user.model";
 
 export interface TransactionModel
 	extends Model<InferAttributes<TransactionModel>, InferCreationAttributes<TransactionModel>> {
 	id: CreationOptional<string>;
 	amount: number;
 	beneficiaryId: string;
+	createdAt: CreationOptional<Date>;
+	updatedAt: CreationOptional<Date>;
 }
 
 const Transaction = sequelize.define<TransactionModel>("transaction", {
@@ -29,6 +30,8 @@ const Transaction = sequelize.define<TransactionModel>("transaction", {
 		type: DataTypes.UUID,
 		allowNull: false,
 	},
+	createdAt: DataTypes.DATE,
+	updatedAt: DataTypes.DATE,
 });
 
 export default Transaction;

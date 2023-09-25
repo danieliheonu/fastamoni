@@ -20,7 +20,9 @@ export interface UserModel
 	setWallet: (wallet: WalletModel) => void;
 	getWallet: () => Promise<WalletModel>;
 	addTransaction: (transaction: TransactionModel) => void;
-	getTransactions: () => Promise<TransactionModel[]>;
+	countTransactions: () => Promise<number>;
+	createdAt: CreationOptional<Date>;
+	updatedAt: CreationOptional<Date>;
 }
 
 const User = sequelize.define<UserModel>("user", {
@@ -61,6 +63,8 @@ const User = sequelize.define<UserModel>("user", {
 			this.setDataValue("transactionPin", hashedPin);
 		},
 	},
+	createdAt: DataTypes.DATE,
+	updatedAt: DataTypes.DATE,
 });
 
 User.hasOne(Wallet);

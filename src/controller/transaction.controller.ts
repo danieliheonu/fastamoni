@@ -3,6 +3,7 @@ import { Request as JWTRequest } from "express-jwt";
 import User from "../model/user.model";
 import { NotFoundException } from "../utils/serviceException";
 import Transaction from "../model/transaction.model";
+import { Op } from "sequelize";
 
 export const createTxnPin = async (req: JWTRequest, res: Response, next: NextFunction) => {
 	try {
@@ -78,12 +79,137 @@ export const getDonations = async (req: JWTRequest, res: Response, next: NextFun
 			throw new NotFoundException("User not found");
 		}
 
-		const transactions = await user.getTransactions();
+		const transactions = await user.countTransactions();
+
+		return res.status(200).json({
+			message: "Transactions count fetched successfully",
+			transactions,
+		});
+	} catch (err) {
+		next(err);
+	}
+};
+
+export const filterDonations = async (req: JWTRequest, res: Response, next: NextFunction) => {
+	try {
+		const user = await User.findByPk(req.auth?.id);
+
+		if (!user) {
+			throw new NotFoundException("User not found");
+		}
+
+		let { startDate, endDate } = req.query;
+
+		const start = startDate ? new Date(startDate as string).toISOString() : null;
+		const end = endDate ? new Date(endDate as string).toISOString() : null;
+
+		let transactions;
+
+		if (start && end) {
+			transactions = await Transaction.findAll({
+				where: {
+					createdAt: {
+						[Op.between]: [start, end],
+					},
+				},
+				include: [
+					{
+						model: User,
+						where: {
+							id: user.id,
+						},
+					},
+				],
+			});
+		} else if (start) {
+			transactions = await Transaction.findAll({
+				where: {
+					createdAt: {
+						[Op.gte]: start,
+					},
+				},
+				include: [
+					{
+						model: User,
+						where: {
+							id: user.id,
+						},
+						attributes: { exclude: ["id", "password", "transactionPin"] },
+					},
+				],
+			});
+		} else if (end) {
+			transactions = await Transaction.findAll({
+				where: {
+					createdAt: {
+						[Op.lt]: end,
+					},
+				},
+				include: [
+					{
+						model: User,
+						where: {
+							id: user.id,
+						},
+						attributes: { exclude: ["id", "password", "transactionPin"] },
+					},
+				],
+			});
+		} else {
+			transactions = await Transaction.findAll({
+				include: [
+					{
+						model: User,
+						where: {
+							id: user.id,
+						},
+						attributes: { exclude: ["id", "password", "transactionPin"] },
+					},
+				],
+			});
+		}
 
 		return res.status(200).json({
 			message: "Transactions fetched successfully",
 			total: transactions.length,
 			transactions,
+		});
+	} catch (err) {
+		console.log(err);
+		next(err);
+	}
+};
+
+export const getTransaction = async (req: JWTRequest, res: Response, next: NextFunction) => {
+	try {
+		const user = await User.findByPk(req.auth?.id);
+
+		if (!user) {
+			throw new NotFoundException("User not found");
+		}
+
+		const transaction = await Transaction.findOne({
+			where: {
+				id: req.params.id,
+			},
+			include: [
+				{
+					model: User,
+					where: {
+						id: user.id,
+					},
+					attributes: { exclude: ["id", "password", "transactionPin"] },
+				},
+			],
+		});
+
+		if (!transaction) {
+			throw new NotFoundException("Transaction not found");
+		}
+
+		return res.status(200).json({
+			message: "Transaction fetched successfully",
+			transaction,
 		});
 	} catch (err) {
 		next(err);
