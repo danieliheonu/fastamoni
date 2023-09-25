@@ -6,6 +6,8 @@ import rateLimit from "express-rate-limit";
 
 const app = express();
 
+app.set("trust proxy", true);
+
 // Rate limit settings
 const limiter = rateLimit({
 	windowMs: 30000, // 30 seconds
