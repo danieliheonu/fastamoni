@@ -20,6 +20,7 @@ export interface UserModel
 	setWallet: (wallet: WalletModel) => void;
 	getWallet: () => Promise<WalletModel>;
 	addTransaction: (transaction: TransactionModel) => void;
+	getTransactions: () => Promise<TransactionModel[]>;
 }
 
 const User = sequelize.define<UserModel>("user", {

@@ -69,3 +69,23 @@ export const donateToBeneficiary = async (req: JWTRequest, res: Response, next: 
 		next(err);
 	}
 };
+
+export const getDonations = async (req: JWTRequest, res: Response, next: NextFunction) => {
+	try {
+		const user = await User.findByPk(req.auth?.id);
+
+		if (!user) {
+			throw new NotFoundException("User not found");
+		}
+
+		const transactions = await user.getTransactions();
+
+		return res.status(200).json({
+			message: "Transactions fetched successfully",
+			total: transactions.length,
+			transactions,
+		});
+	} catch (err) {
+		next(err);
+	}
+};
