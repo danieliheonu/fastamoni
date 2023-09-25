@@ -18,9 +18,10 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
 
 		const user = await User.findOne({ where: { email } });
 
+		// create a user wallet
 		const wallet = await Wallet.create();
 
-		// create a user wallet
+		// associate it with the user
 		user?.setWallet(wallet);
 
 		return res.status(201).json({

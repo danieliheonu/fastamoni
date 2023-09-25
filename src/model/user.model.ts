@@ -8,6 +8,7 @@ import {
 import sequelize from "../config/db";
 import Wallet, { WalletModel } from "./wallet.model";
 import bcrypt from "bcryptjs";
+import Transaction, { TransactionModel } from "./transaction.model";
 
 export interface UserModel
 	extends Model<InferAttributes<UserModel>, InferCreationAttributes<UserModel>> {
@@ -16,9 +17,9 @@ export interface UserModel
 	email: string;
 	password: string;
 	transactionPin: CreationOptional<string>;
-	createdAt: CreationOptional<Date>;
-	updatedAt: CreationOptional<Date>;
 	setWallet: (wallet: WalletModel) => void;
+	getWallet: () => Promise<WalletModel>;
+	addTransaction: (transaction: TransactionModel) => void;
 }
 
 const User = sequelize.define<UserModel>("user", {
@@ -59,10 +60,12 @@ const User = sequelize.define<UserModel>("user", {
 			this.setDataValue("transactionPin", hashedPin);
 		},
 	},
-	createdAt: DataTypes.DATE,
-	updatedAt: DataTypes.DATE,
 });
 
 User.hasOne(Wallet);
+Wallet.belongsTo(User);
+
+User.hasMany(Transaction);
+Transaction.belongsTo(User);
 
 export default User;
