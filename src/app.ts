@@ -6,7 +6,7 @@ import rateLimit from "express-rate-limit";
 
 const app = express();
 
-app.set("trust proxy", true);
+app.set("trust proxy", "loopback");
 
 // Rate limit settings
 const limiter = rateLimit({
