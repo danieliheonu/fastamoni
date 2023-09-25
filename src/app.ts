@@ -2,8 +2,17 @@ import express, { Express, Request, Response } from "express";
 import cors from "cors";
 import route from "./route";
 import errorHandler from "./middleware/exceptionFilter";
+import rateLimit from "express-rate-limit";
 
 const app = express();
+
+// Rate limit settings
+const limiter = rateLimit({
+	windowMs: 30000, // 30 seconds
+	max: 100,
+});
+
+app.use(limiter);
 
 app.use(cors());
 
